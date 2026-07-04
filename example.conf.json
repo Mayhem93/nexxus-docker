@@ -1,0 +1,35 @@
+{
+	"database": {
+		"host": "es01",
+		"port": 9200
+	},
+	"message_queue": {
+		"host": "rabbitmq",
+		"port": 5672,
+		"user": "guest",
+		"password": "guest"
+	},
+	"redis": {
+		"host": "redis",
+		"port": 6379,
+		"cluster": false,
+		"password": "1234test"
+	},
+	"app": {
+		"name": "my-nexxus-deployment",
+		"port": 5000,
+		"logger": "WinstonNexxusLogger",
+		"database": "NexxusElasticsearchDb",
+		"message_queue": "NexxusRabbitMq",
+		"auth": {
+			"availableStrategies": ["local", "google"]
+		}
+	},
+	"logger": {
+		"level": "info",
+		"logType": "json",
+		"transports": [
+			{ "type": "stdout" }
+		]
+	}
+}
