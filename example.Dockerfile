@@ -17,7 +17,7 @@
 #   docker run --rm -p 5000:5000 my-nexxus-deployment
 # -----------------------------------------------------------------------------
 
-FROM razvanbotea/nexxus-api:0.0.3
+FROM razvanbotea/nexxus-api:0.0.5
 
 # The base image already sets, so you don't repeat them:
 #   WORKDIR  /usr/local/nexxus-api   (install dir; where node_modules lives)
@@ -63,8 +63,15 @@ ENV NXX_LOG_LEVEL=debug
 # base keeps --enable-source-maps in its CMD; node merges NODE_OPTIONS on top).
 # Size the V8 heap to ~75% of the container's memory limit to avoid OOM kills —
 # bake a default here, or set it per-deploy via `docker run -e NODE_OPTIONS=...`:
-    
+
 # ENV NODE_OPTIONS=--max-old-space-size=768      # e.g. for a ~1Gi memory limit
 
 # That's it — ENTRYPOINT/CMD/EXPOSE are inherited from the base image.
 # Only add an `EXPOSE <port>` here if you change app.port in the config.
+
+# If using the nexxus hub API, expose the management port (default 9001) so the 
+# hub can reach it. The hub endpoint and token are set in the config above, and 
+# the hub will call the management API to register this instance. If you don't 
+# use the hub, you can remove this EXPOSE line and the management section from 
+# the config.
+EXPOSE 9001 9001

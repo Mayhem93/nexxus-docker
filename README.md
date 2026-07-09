@@ -7,14 +7,15 @@ image, supplies its own config, adds any custom adapters, and sets the env vars
 its config needs.
 
 | Image | Docker Hub | Status |
-|-------|-----------|--------|
+| ------- | ----------- | -------- |
 | **API** | [`razvanbotea/nexxus-api`](https://hub.docker.com/r/razvanbotea/nexxus-api) | available |
-| Writer worker | — | planned |
+| **Writer worker** | [`razvanbotea/nexxus-worker-writer`](https://hub.docker.com/r/razvanbotea/nexxus-worker-writer) | available |
 | Transport manager worker | — | planned |
 | WebSockets transport worker | — | planned |
 
-Image tags track [`nexxus-api`](https://github.com/Mayhem93/nexxus-api) releases
-(see [Docker Hub tags](https://hub.docker.com/r/razvanbotea/nexxus-api/tags)).
+Each image's tags track its own source component's releases — e.g. the API image
+tracks [`nexxus-api`](https://github.com/Mayhem93/nexxus-api) and the writer worker
+tracks [`nexxus-worker-writer`](https://github.com/Mayhem93/nexxus-worker-writer).
 
 ---
 
@@ -70,13 +71,40 @@ reference lives in the [`nexxus-api` README](https://github.com/Mayhem93/nexxus-
 
 ---
 
+## Writer worker
+
+The writer worker consumes queued model writes, persists them to the database, and
+notifies the transport manager. It's a **background queue consumer — no HTTP port**,
+so there's nothing to publish with `-p`. Otherwise it follows the same base-image
+conventions as the API: no config baked in, non-root `nexxus` user, `tini` as PID 1,
+and `NODE_OPTIONS` runtime tuning.
+
+| Property | Value |
+| ---------- | ------- |
+| Docker Hub | [`razvanbotea/nexxus-worker-writer`](https://hub.docker.com/r/razvanbotea/nexxus-worker-writer) |
+| Source | [`nexxus-worker-writer`](https://github.com/Mayhem93/nexxus-worker-writer) |
+| Install dir | `/usr/local/nexxus-worker-writer` |
+| `NXX_CONF_PATH` default | `/etc/nexxus/worker-writer.conf.json` |
+
+```bash
+# Run with a bind-mounted config (no port to publish)
+docker run --rm \
+  -v "$PWD/worker-writer.conf.json:/etc/nexxus/worker-writer.conf.json:ro" \
+  razvanbotea/nexxus-worker-writer:0.0.1
+```
+
+Building a deployment image on top, the [Configuration](#configuration) below, and
+custom adapters all work exactly as for the API — just without the port.
+
+---
+
 ## Configuration
 
 ### Environment variables
 
 | Variable | Default | Purpose |
-|----------|---------|---------|
-| `NXX_CONF_PATH` | `/etc/nexxus/api.conf.json` | Where the server reads its config file. |
+| ---------- | --------- | --------- |
+| `NXX_CONF_PATH` | per image | Where the process reads its config file (API `/etc/nexxus/api.conf.json`, writer worker `/etc/nexxus/worker-writer.conf.json`). |
 | `NXX_LOG_LEVEL` | (from config) | Overrides `logger.level`. Other per-service overrides are derived from each service's schema. |
 | `NODE_OPTIONS` | (unset) | Node runtime flags, e.g. `--max-old-space-size=768`. Size the heap to ~75% of the container's memory limit to avoid OOM kills. `--enable-source-maps` is always on. |
 
@@ -92,8 +120,10 @@ section. Built-ins resolve by class name; custom adapters are npm packages
 
 ### A note on the port
 
-`EXPOSE` is metadata only — the actual listen port comes from `app.port` in the
-config (default `5000`). Publish the port that matches your config: `-p <host>:<app.port>`.
+Applies to images that listen (the API today; the WebSockets transport worker later)
+— the writer and transport-manager workers have no port. `EXPOSE` is metadata only:
+the actual listen port comes from `app.port` in the config (default `5000`). Publish
+the port that matches your config: `-p <host>:<app.port>`.
 
 ---
 
@@ -106,7 +136,7 @@ docker build -t nexxus-api ./api
 Build args (`--build-arg`):
 
 | Arg | Default | Purpose |
-|-----|---------|---------|
+| ----- | --------- | --------- |
 | `INSTALL_DIR` | `/usr/local/nexxus-api` | Where the app is installed (also the WORKDIR). |
 | `NXX_CONF_PATH` | `/etc/nexxus/api.conf.json` | Default config path baked as `ENV`. |
 | `APP_PORT` | `5000` | Port used for `EXPOSE`. |
@@ -114,6 +144,9 @@ Build args (`--build-arg`):
 
 The Node version and the `nexxus-api` release are intentionally fixed in the
 Dockerfile (not build args) — they move on a release basis.
+
+The **writer worker** builds the same way from `./worker-writer` — same args minus
+`APP_PORT`, and its source-override arg is `NEXXUS_WORKER_ARCHIVE_URL`.
 
 ---
 
