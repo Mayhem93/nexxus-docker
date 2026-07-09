@@ -10,7 +10,7 @@ its config needs.
 | ------- | ----------- | -------- |
 | **API** | [`razvanbotea/nexxus-api`](https://hub.docker.com/r/razvanbotea/nexxus-api) | available |
 | **Writer worker** | [`razvanbotea/nexxus-worker-writer`](https://hub.docker.com/r/razvanbotea/nexxus-worker-writer) | available |
-| Transport manager worker | — | planned |
+| **Transport manager worker** | [`razvanbotea/nexxus-worker-transport-manager`](https://hub.docker.com/r/razvanbotea/nexxus-worker-transport-manager) | available |
 | WebSockets transport worker | — | planned |
 
 Each image's tags track its own source component's releases — e.g. the API image
@@ -98,6 +98,33 @@ custom adapters all work exactly as for the API — just without the port.
 
 ---
 
+## Transport manager worker
+
+The transport manager worker consumes the transport-manager queue, resolves which
+devices are subscribed (via Redis), and routes each notification to the right
+transport-specific queue. Like the writer, it's a **background queue consumer — no
+HTTP port** — and follows the same base-image conventions (no config baked in,
+non-root `nexxus` user, `tini` as PID 1, `NODE_OPTIONS` runtime tuning).
+
+| Property | Value |
+| ---------- | ------- |
+| Docker Hub | [`razvanbotea/nexxus-worker-transport-manager`](https://hub.docker.com/r/razvanbotea/nexxus-worker-transport-manager) |
+| Source | [`nexxus-worker-transport-manager`](https://github.com/Mayhem93/nexxus-worker-transport-manager) |
+| Install dir | `/usr/local/nexxus-worker-transport-manager` |
+| `NXX_CONF_PATH` default | `/etc/nexxus/worker-transport-manager.conf.json` |
+
+```bash
+# Run with a bind-mounted config (no port to publish)
+docker run --rm \
+  -v "$PWD/worker-transport-manager.conf.json:/etc/nexxus/worker-transport-manager.conf.json:ro" \
+  razvanbotea/nexxus-worker-transport-manager:0.0.1
+```
+
+Building a deployment image on top, the [Configuration](#configuration) below, and
+custom adapters all work exactly as for the API — just without the port.
+
+---
+
 ## Configuration
 
 ### Environment variables
@@ -145,8 +172,9 @@ Build args (`--build-arg`):
 The Node version and the `nexxus-api` release are intentionally fixed in the
 Dockerfile (not build args) — they move on a release basis.
 
-The **writer worker** builds the same way from `./worker-writer` — same args minus
-`APP_PORT`, and its source-override arg is `NEXXUS_WORKER_ARCHIVE_URL`.
+The **workers** build the same way from their own directories (`./worker-writer`,
+`./worker-transport-manager`) — same args minus `APP_PORT`, with the source-override
+arg `NEXXUS_WORKER_ARCHIVE_URL`.
 
 ---
 
