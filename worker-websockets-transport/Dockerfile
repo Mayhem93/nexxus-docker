@@ -39,7 +39,7 @@ ARG INSTALL_DIR
 # Caveat: ADD can't send auth headers, so a private URL must already be
 # authenticated (e.g. a signed URL). Token-auth fetches need a secret mount:
 #   RUN --mount=type=secret,id=token wget --header=... -O /tmp/src.tgz <url>
-ARG NEXXUS_WORKER_ARCHIVE_URL=https://github.com/Mayhem93/nexxus-worker-websockets-transport/archive/refs/tags/0.0.2.tar.gz
+ARG NEXXUS_WORKER_ARCHIVE_URL=https://github.com/Mayhem93/nexxus-worker-websockets-transport/archive/refs/tags/0.0.3.tar.gz
 
 WORKDIR ${INSTALL_DIR}
 
@@ -71,7 +71,7 @@ ARG NXX_CONF_PATH
 LABEL org.opencontainers.image.title="nexxus-worker-websockets-transport" \
       org.opencontainers.image.description="Pluggable base image for the Nexxus Worker Websockets Transport" \
       org.opencontainers.image.source="https://github.com/Mayhem93/nexxus-worker-websockets-transport" \
-      org.opencontainers.image.version="0.0.2" \
+      org.opencontainers.image.version="0.0.3" \
       org.opencontainers.image.licenses="MPL-2.0"
 
 # Proper PID 1 via tini (reaps zombies + forwards signals), plus a dedicated,
