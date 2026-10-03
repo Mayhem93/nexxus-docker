@@ -55,7 +55,8 @@ RUN tar -xzf /tmp/src.tgz --strip-components=1 -C ${INSTALL_DIR} \
 # `npm ci` for a clean, reproducible install straight from the committed
 # package-lock.json (present as of tag 0.0.2). Dev deps are needed for `tsc`;
 # `npm prune --omit=dev` strips them afterwards so only prod deps get copied on.
-RUN npm ci \
+RUN npm update -g npm \
+ && npm ci \
  && npm run build \
  && npm prune --omit=dev
 

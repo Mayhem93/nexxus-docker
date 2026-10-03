@@ -6,12 +6,12 @@ These are **base images** meant to be extended. A deployment builds `FROM` a bas
 image, supplies its own config, adds any custom adapters, and sets the env vars
 its config needs.
 
-| Image | Docker Hub | Status |
-| ------- | ----------- | -------- |
-| **API** | [`razvanbotea/nexxus-api`](https://hub.docker.com/r/razvanbotea/nexxus-api) | available |
-| **Writer worker** | [`razvanbotea/nexxus-worker-writer`](https://hub.docker.com/r/razvanbotea/nexxus-worker-writer) | available |
-| **Transport manager worker** | [`razvanbotea/nexxus-worker-transport-manager`](https://hub.docker.com/r/razvanbotea/nexxus-worker-transport-manager) | available |
-| WebSockets transport worker | — | planned |
+| Image | Docker Hub |
+| ------- | ----------- |
+| **API** | [`razvanbotea/nexxus-api`](https://hub.docker.com/r/razvanbotea/nexxus-api) |
+| **Writer worker** | [`razvanbotea/nexxus-worker-writer`](https://hub.docker.com/r/razvanbotea/nexxus-worker-writer) |
+| **Transport manager worker** | [`razvanbotea/nexxus-worker-transport-manager`](https://hub.docker.com/r/razvanbotea/nexxus-worker-transport-manager) |
+| **WebSockets transport worker** | [`razvanbotea/nexxus-worker-websockets`](https://hub.docker.com/r/razvanbotea/nexxus-worker-websockets) |
 
 Each image's tags track its own source component's releases — e.g. the API image
 tracks [`nexxus-api`](https://github.com/Mayhem93/nexxus-api) and the writer worker
